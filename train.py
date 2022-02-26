@@ -14,17 +14,18 @@ def main():
     parser.add_argument("checkpoint_dir", type=str,
                         help='Directory to log model checkpoints')
 
-    parser.add_argument("--buffer_size", type=int, default=400,
-                        help='Directory to log model checkpoints')
+    parser.add_argument("--buffer_size", type=int, default=400)
 
-    parser.add_argument("--batch_size", type=int, default=1,
-                        help='Directory to log model checkpoints')
+    parser.add_argument("--batch_size", type=int, default=1)
 
     parser.add_argument("--patches_per_image", type=int, default=10,
-                        help='Directory to log model checkpoints')
+                        help='Patches cropped from every train image')
 
     parser.add_argument("--image_size", type=int, default=512,
-                        help='Directory to log model checkpoints')
+                        help='Size of the image patch to enhance')
+
+    parser.add_argument("--epochs", type=int, default=512,
+                        help='Number of training epochs')
 
     args = parser.parse_args()
 
@@ -64,7 +65,7 @@ def main():
     """
     optimiser = Optimiser(args.checkpoint_dir, image_size=args.image_size)
     
-    optimiser.train(dataset_train, dataset_val, steps=500)
+    optimiser.train(dataset_train, dataset_val, steps=args.epochs)
 
 
 if __name__ == "__main__":
