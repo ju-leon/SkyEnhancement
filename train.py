@@ -31,6 +31,14 @@ def main():
 
 
     """
+    Init WandB
+    """
+    wandb.init(project="stargazer-enhance", config=config)
+    wandb.define_metric(name="train/epoch")
+    wandb.define_metric(name="train/*",
+                        step_metric="train/epoch")
+
+    """
     Load the datasets
     """
     dataset_train = Dataset(os.path.join(args.data_dir, "train"))
@@ -46,14 +54,6 @@ def main():
     dataset_val = tf.data.Dataset.from_tensor_slices(data_val)
     dataset_val = dataset_val.shuffle(args.buffer_size)
     dataset_val = dataset_val.batch(args.batch_size)
-
-    """
-    Init WandB
-    """
-    wandb.init(project="stargazer-enhance", config=config)
-    wandb.define_metric(name="train/epoch")
-    wandb.define_metric(name="train/*",
-                        step_metric="train/epoch")
 
 
     """
