@@ -4,7 +4,7 @@ import os
 import glob
 import cv2
 import numpy as np
-import tqdm
+from tqdm import tqdm
 
 IMAGE_FORMAT = ".jpg"
 
