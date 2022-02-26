@@ -8,10 +8,10 @@ import wandb
 def main():
     parser = argparse.ArgumentParser(description='Setup variables')
 
-    parser.add_argument("--data_dir", type=str, default="data",
+    parser.add_argument("data_dir", type=str,
                         help='Expects a data dir with subfolders train/, val/ with containing images')
 
-    parser.add_argument("--checkpoint_dir", type=str, default="data",
+    parser.add_argument("checkpoint_dir", type=str,
                         help='Directory to log model checkpoints')
 
     parser.add_argument("--buffer_size", type=int, default=400,
