@@ -25,7 +25,7 @@ class Optimiser:
                                               discriminator=self.discriminator_model)
 
     def generate_images(self, model, dataset, step, num_images=4):
-        plt.figure(figsize=(15, 15))
+        plt.figure(figsize=(10, 20))
         fig, axs = plt.subplots(num_images, 3)
 
         for k in range(num_images):
@@ -47,6 +47,8 @@ class Optimiser:
             'train/epoch': step,
             'train/prediction': wandb.Image(plt)}
         )
+
+        plt.close()
 
     def train(self, train_ds, val_ds, steps=10):
         start = time.time()
@@ -79,7 +81,7 @@ class Optimiser:
                 })
 
             # Save (checkpoint) the model every 5k steps
-            if (step + 1) % 5000 == 0:
+            if (step + 1) % 100 == 0:
                 self.checkpoint.save(file_prefix=self.checkpoint_prefix)
 
     @tf.function

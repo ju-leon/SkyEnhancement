@@ -7,8 +7,10 @@ import numpy as np
 
 IMAGE_FORMAT = ".jpg"
 
+
 def reduce_haze(image, **kwargs):
     return (np.power(image / 255, 4) * 255).astype(np.uint8)
+
 
 class Dataset:
     def get_filename(self, string):
@@ -25,7 +27,6 @@ class Dataset:
             images_dir, image_id + IMAGE_FORMAT) for image_id in self.ids]
 
         self.augmentation = self.get_training_augmentation()
-
 
     def __getitem__(self, i):
         return self.get_sample(self.images_fps[i])
@@ -55,12 +56,10 @@ class Dataset:
 
     def get_training_augmentation(self):
         train_transform = [
-            albu.augmentations.geometric.resize.LongestMaxSize(max_size=1024),
-
             albu.HorizontalFlip(p=0.5),
 
             albu.augmentations.geometric.transforms.ShiftScaleRotate(
-                scale_limit=0.2, rotate_limit=0, shift_limit=0.1, p=1, border_mode=0),
+                scale_limit=[-0.5, 3], rotate_limit=45, shift_limit=0.1, p=1, border_mode=0),
 
             albu.augmentations.transforms.PadIfNeeded(min_height=self.image_size,
                                                       min_width=self.image_size,
@@ -74,20 +73,14 @@ class Dataset:
             albu.augmentations.transforms.GaussNoise(p=0.4),
             albu.augmentations.transforms.ISONoise(p=0.3),
             albu.augmentations.geometric.transforms.Perspective(p=0.2),
+            albu.augmentations.transforms.RandomFog(p=0.05),
 
             albu.OneOf(
                 [
                     albu.augmentations.transforms.RandomToneCurve(p=1),
                     albu.augmentations.transforms.RGBShift(p=1),
-                    albu.augmentations.transforms.Lambda(image=reduce_haze, p=1)
-
-                ],
-                p=0.5
-            ),
-
-            albu.OneOf(
-                [
-                    albu.augmentations.transforms.RandomFog(p=1),
+                    albu.augmentations.transforms.Lambda(
+                        image=reduce_haze, p=1)
 
                 ],
                 p=0.5
