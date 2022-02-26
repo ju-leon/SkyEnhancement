@@ -23,6 +23,9 @@ def main():
     parser.add_argument("--patches_per_image", type=int, default=10,
                         help='Directory to log model checkpoints')
 
+    parser.add_argument("--image_size", type=int, default=512,
+                        help='Directory to log model checkpoints')
+
     args = parser.parse_args()
 
     config = {}
@@ -41,8 +44,8 @@ def main():
     """
     Load the datasets
     """
-    dataset_train = Dataset(os.path.join(args.data_dir, "train"))
-    dataset_val = Dataset(os.path.join(args.data_dir, "val"))
+    dataset_train = Dataset(os.path.join(args.data_dir, "train"), image_size=args.image_size)
+    dataset_val = Dataset(os.path.join(args.data_dir, "val"), image_size=args.image_size)
 
     data_train = dataset_train.get_dataset(patches_per_image=args.patches_per_image)
     data_val = dataset_val.get_dataset(patches_per_image=args.patches_per_image)
@@ -59,7 +62,7 @@ def main():
     """
     Define optimiser
     """
-    optimiser = Optimiser(args.checkpoint_dir)
+    optimiser = Optimiser(args.checkpoint_dir, image_size=args.image_size)
     
     optimiser.train(dataset_train, dataset_val, steps=500)
 

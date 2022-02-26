@@ -50,8 +50,8 @@ class Generator:
 
         return total_gen_loss, gan_loss, l1_loss
 
-    def get_model():
-        inputs = tf.keras.layers.Input(shape=[256, 256, 3])
+    def get_model(image_size):
+        inputs = tf.keras.layers.Input(shape=[image_size, image_size, 3])
 
         down_stack = [
             # (batch_size, 128, 128, 64)
@@ -112,11 +112,11 @@ class Discriminator:
 
         return total_disc_loss
 
-    def get_model():
+    def get_model(image_size):
         initializer = tf.random_normal_initializer(0., 0.02)
 
-        inp = tf.keras.layers.Input(shape=[256, 256, 3], name='input_image')
-        tar = tf.keras.layers.Input(shape=[256, 256, 3], name='target_image')
+        inp = tf.keras.layers.Input(shape=[image_size, image_size, 3], name='input_image')
+        tar = tf.keras.layers.Input(shape=[image_size, image_size, 3], name='target_image')
 
         x = tf.keras.layers.concatenate([inp, tar])  # (batch_size, 256, 256, channels*2)
 

@@ -7,11 +7,13 @@ import os
 
 
 class Optimiser:
-    def __init__(self, checkpoint_dir) -> None:
-        self.generator_model = Generator.get_model()
+    def __init__(self,
+                 checkpoint_dir,
+                 image_size):
+        self.generator_model = Generator.get_model(image_size=image_size)
         self.generator_loss = Generator.loss
 
-        self.discriminator_model = Discriminator.get_model()
+        self.discriminator_model = Discriminator.get_model(image_size=image_size)
         self.discriminator_loss = Discriminator.loss
 
         self.generator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
@@ -54,7 +56,7 @@ class Optimiser:
         start = time.time()
 
         for step, (input_image, target) in train_ds.repeat().take(steps).enumerate():
-            if (step) % 100 == 0:
+            if (step) % 1000 == 0:
                 if step != 0:
                     print(
                         f'Time taken for 1000 steps: {time.time()-start:.2f} sec\n')
@@ -81,7 +83,7 @@ class Optimiser:
                 })
 
             # Save (checkpoint) the model every 5k steps
-            if (step + 1) % 100 == 0:
+            if (step + 1) % 5000 == 0:
                 self.checkpoint.save(file_prefix=self.checkpoint_prefix)
 
     @tf.function
