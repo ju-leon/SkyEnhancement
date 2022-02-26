@@ -47,8 +47,8 @@ class Dataset:
     def get_dataset(self, patches_per_image=4):
         images_input = []
         images_output = []
-        for image_path in self.images_fps:
-            for _ in tqdm(range(patches_per_image)):
+        for image_path in tqdm(self.images_fps):
+            for _ in range(patches_per_image):
                 image_input, image_output = self.get_sample(path=image_path)
                 images_input.append(image_input)
                 images_output.append(image_output)
