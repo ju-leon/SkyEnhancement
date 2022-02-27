@@ -13,8 +13,8 @@ class Optimiser:
                  image_size,
                  lr_generator,
                  lr_discriminator):
-        self.generator_model = Generator.get_model(image_size=image_size)
-        self.generator_loss = Generator.loss
+
+        self.generator= Generator(image_size=image_size)
 
         self.discriminator_model = Discriminator.get_model(image_size=image_size)
         self.discriminator_loss = Discriminator.loss
@@ -23,10 +23,11 @@ class Optimiser:
         self.discriminator_optimizer = tf.keras.optimizers.Adam(
             lr_discriminator, beta_1=0.5)
 
+        self.checkpoint_dir = checkpoint_dir
         self.checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
         self.checkpoint = tf.train.Checkpoint(generator_optimizer=self.generator_optimizer,
                                               discriminator_optimizer=self.discriminator_optimizer,
-                                              generator=self.generator_model,
+                                              generator=self.generator.model,
                                               discriminator=self.discriminator_model)
 
     def generate_images(self, model, dataset, step, num_images=3):
@@ -48,8 +49,7 @@ class Optimiser:
 
 
         plt.subplots_adjust(wspace=0, hspace=0)
-        #plt.tight_layout()
-        plt.show()
+        plt.tight_layout()
 
         wandb.log({
             'train/epoch': step,
@@ -57,6 +57,7 @@ class Optimiser:
         )
 
         plt.close()
+
 
     def train(self, train_ds, val_ds, steps=10):
         start = time.time()
@@ -68,7 +69,7 @@ class Optimiser:
                         f'Time taken for 1000 steps: {time.time()-start:.2f} sec\n')
 
                 start = time.time()
-                self.generate_images(self.generator_model,
+                self.generate_images(self.generator.model,
                                      val_ds,
                                      step)
 
@@ -92,28 +93,30 @@ class Optimiser:
             if (step + 1) % 5000 == 0:
                 self.checkpoint.save(file_prefix=self.checkpoint_prefix)
 
+        self.generator.save_model(self.checkpoint_dir)
+        
     @tf.function
     def train_step(self, input_image, target):
         with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
-            gen_output = self.generator_model(input_image, training=True)
+            gen_output = self.generator.model(input_image, training=True)
 
             disc_real_output = self.discriminator_model(
                 [input_image, target], training=True)
             disc_generated_output = self.discriminator_model(
                 [input_image, gen_output], training=True)
 
-            gen_total_loss, gen_gan_loss, gen_l1_loss = self.generator_loss(
+            gen_total_loss, gen_gan_loss, gen_l1_loss = self.generator.loss(
                 disc_generated_output, gen_output, target)
             disc_loss = self.discriminator_loss(
                 disc_real_output, disc_generated_output)
 
         generator_gradients = gen_tape.gradient(gen_total_loss,
-                                                self.generator_model.trainable_variables)
+                                                self.generator.model.trainable_variables)
         discriminator_gradients = disc_tape.gradient(disc_loss,
                                                      self.discriminator_model.trainable_variables)
 
         self.generator_optimizer.apply_gradients(zip(generator_gradients,
-                                                     self.generator_model.trainable_variables))
+                                                     self.generator.model.trainable_variables))
 
         self.discriminator_optimizer.apply_gradients(zip(discriminator_gradients,
                                                          self.discriminator_model.trainable_variables))

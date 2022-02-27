@@ -43,6 +43,9 @@ def main():
 
     config['log_dir'] = os.path.join(args.checkpoint_dir, str(uuid.uuid4()))
 
+    if not os.path.exists(config['log_dir']):
+        os.makedirs(config['log_dir'])
+
     """
     Init WandB
     """

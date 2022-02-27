@@ -1,4 +1,6 @@
 import tensorflow as tf
+import os 
+import wandb
 
 OUTPUT_CHANNELS = 3
 loss_object = tf.keras.losses.BinaryCrossentropy(from_logits=True)
@@ -39,7 +41,11 @@ def upsample(filters, size, apply_dropout=False):
 
 
 class Generator:
-    def loss(disc_generated_output, gen_output, target, lamda=100):
+    def __init__(self, image_size) -> None:
+        self.image_size = image_size
+        self.model = self.get_model()
+
+    def loss(self, disc_generated_output, gen_output, target, lamda=100):
         gan_loss = loss_object(tf.ones_like(
             disc_generated_output), disc_generated_output)
 
@@ -50,8 +56,8 @@ class Generator:
 
         return total_gen_loss, gan_loss, l1_loss
 
-    def get_model(image_size):
-        inputs = tf.keras.layers.Input(shape=[image_size, image_size, 3])
+    def get_model(self):
+        inputs = tf.keras.layers.Input(shape=[self.image_size, self.image_size, 3])
 
         down_stack = [
             # (batch_size, 128, 128, 64)
@@ -101,6 +107,12 @@ class Generator:
 
         return tf.keras.Model(inputs=inputs, outputs=x)
 
+    def save_model(self, directory, save_to_wandb=True):
+        model_path = os.path.join(directory, 'model.h5')
+        print(model_path)
+        self.model.save(model_path)
+        if save_to_wandb:
+            wandb.save(model_path)
 
 class Discriminator:
     def loss(disc_real_output, disc_generated_output):
