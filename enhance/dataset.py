@@ -76,7 +76,7 @@ class Dataset:
 
             # Make sure most images are less bright and desaturated
             albu.augmentations.transforms.ColorJitter(
-                brightness=[0.8, 1], contrast=0, saturation=[0.2, 0.9], p=0.9),
+                brightness=[0.8, 1], contrast=0.3, saturation=[0.4, 0.9], p=0.9),
             albu.augmentations.transforms.Lambda(image=reduce_haze, p=0.3),
 
 
@@ -87,13 +87,6 @@ class Dataset:
             albu.OneOf(
                 [
                     albu.augmentations.transforms.RandomToneCurve(p=1),
-                    albu.augmentations.transforms.RGBShift(p=1),
-                ],
-                p=0.5
-            ),
-
-            albu.OneOf(
-                [
                     albu.augmentations.transforms.CLAHE(p=1),
                     albu.augmentations.transforms.RandomGamma(p=1),
                 ],
@@ -112,11 +105,10 @@ class Dataset:
 
             albu.OneOf(
                 [
-                    albu.augmentations.transforms.RandomBrightnessContrast(
-                        brightness_limit=[-0.6, 0.1], p=1),
+                    albu.augmentations.transforms.RandomBrightnessContrast(p=1),
                     albu.augmentations.transforms.HueSaturationValue(p=1),
                 ],
-                p=0.9,
+                p=0.5,
             ),
         ]
         return albu.Compose(train_transform)
