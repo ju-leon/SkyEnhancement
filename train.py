@@ -29,10 +29,10 @@ def main():
     parser.add_argument("--epochs", type=int, default=512,
                         help='Number of training epochs')
 
-    parser.add_argument("--lr_generator", type=int, default=1e-4,
+    parser.add_argument("--lr_generator", type=float, default=1e-4,
                         help='Number of training epochs')
 
-    parser.add_argument("--lr_discriminator", type=int, default=1e-4,
+    parser.add_argument("--lr_discriminator", type=float, default=1e-4,
                         help='Number of training epochs')
 
     args = parser.parse_args()
