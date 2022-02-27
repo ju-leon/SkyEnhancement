@@ -60,15 +60,16 @@ class Generator:
         inputs = tf.keras.layers.Input(shape=[self.image_size, self.image_size, 3])
 
         down_stack = [
-            # (batch_size, 128, 128, 64)
+            # (batch_size, 512, 512, 64)
             downsample(64, 4, apply_batchnorm=False),
-            downsample(128, 4),  # (batch_size, 64, 64, 128)
-            downsample(256, 4),  # (batch_size, 32, 32, 256)
-            downsample(512, 4),  # (batch_size, 16, 16, 512)
+            downsample(64, 4),  # (batch_size, 256, 256, 128)
+            downsample(128, 4),  # (batch_size, 128, 128, 256)
+            downsample(128, 4),  # (batch_size, 64, 64, 512)
+            downsample(256, 4),  # (batch_size, 32, 32, 512)
+            downsample(256, 4),  # (batch_size, 16, 16, 512)
             downsample(512, 4),  # (batch_size, 8, 8, 512)
             downsample(512, 4),  # (batch_size, 4, 4, 512)
             downsample(512, 4),  # (batch_size, 2, 2, 512)
-            downsample(512, 4),  # (batch_size, 1, 1, 512)
         ]
 
         up_stack = [
@@ -79,6 +80,8 @@ class Generator:
             upsample(256, 4),  # (batch_size, 32, 32, 512)
             upsample(128, 4),  # (batch_size, 64, 64, 256)
             upsample(64, 4),  # (batch_size, 128, 128, 128)
+            upsample(64, 4),  # (batch_size, 256, 256, 64)
+            upsample(32, 4),  # (batch_size, 512, 512, 64)
         ]
 
         initializer = tf.random_normal_initializer(0., 0.02)

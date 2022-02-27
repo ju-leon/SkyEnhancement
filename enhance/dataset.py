@@ -106,7 +106,7 @@ class Dataset:
             albu.OneOf(
                 [
                     albu.augmentations.transforms.RandomBrightnessContrast(p=1),
-                    albu.augmentations.transforms.HueSaturationValue(p=1),
+                    albu.augmentations.transforms.HueSaturationValue(hue_shift_limit=5, p=1),
                 ],
                 p=0.5,
             ),
