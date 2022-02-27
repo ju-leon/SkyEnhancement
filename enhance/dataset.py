@@ -60,7 +60,10 @@ class Dataset:
             albu.HorizontalFlip(p=0.5),
 
             albu.augmentations.geometric.transforms.ShiftScaleRotate(
-                scale_limit=[-0.5, 3], rotate_limit=45, shift_limit=0.1, p=1, border_mode=0),
+                scale_limit=0.1, rotate_limit=45, shift_limit=0.1, p=1, border_mode=0),
+
+            albu.augmentations.geometric.resize.LongestMaxSize(
+                max_size=self.image_size * 2, p=0.8),
 
             albu.augmentations.transforms.PadIfNeeded(min_height=self.image_size,
                                                       min_width=self.image_size,
@@ -71,18 +74,20 @@ class Dataset:
                                                            width=self.image_size,
                                                            always_apply=True),
 
-            albu.augmentations.transforms.GaussNoise(p=0.4),
-            albu.augmentations.transforms.ISONoise(p=0.3),
+            # Make sure most images are less bright and desaturated
+            albu.augmentations.transforms.ColorJitter(
+                brightness=[0.8, 1], contrast=0, saturation=[0.2, 0.9], p=0.9),
+            albu.augmentations.transforms.Lambda(image=reduce_haze, p=0.3),
+
+
+            albu.augmentations.transforms.GaussNoise(p=0.2),
+            albu.augmentations.transforms.ISONoise(p=0.2),
             albu.augmentations.geometric.transforms.Perspective(p=0.2),
-            albu.augmentations.transforms.RandomFog(p=0.05),
 
             albu.OneOf(
                 [
                     albu.augmentations.transforms.RandomToneCurve(p=1),
                     albu.augmentations.transforms.RGBShift(p=1),
-                    albu.augmentations.transforms.Lambda(
-                        image=reduce_haze, p=1)
-
                 ],
                 p=0.5
             ),
@@ -102,7 +107,7 @@ class Dataset:
                     albu.augmentations.transforms.MotionBlur(
                         blur_limit=3, p=1),
                 ],
-                p=0.9,
+                p=0.2,
             ),
 
             albu.OneOf(

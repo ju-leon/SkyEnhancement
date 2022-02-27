@@ -1,3 +1,4 @@
+from turtle import shape
 import tensorflow as tf
 from enhance.models import Generator, Discriminator
 import wandb
@@ -9,16 +10,18 @@ import os
 class Optimiser:
     def __init__(self,
                  checkpoint_dir,
-                 image_size):
+                 image_size,
+                 lr_generator,
+                 lr_discriminator):
         self.generator_model = Generator.get_model(image_size=image_size)
         self.generator_loss = Generator.loss
 
         self.discriminator_model = Discriminator.get_model(image_size=image_size)
         self.discriminator_loss = Discriminator.loss
 
-        self.generator_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
+        self.generator_optimizer = tf.keras.optimizers.Adam(lr_generator, beta_1=0.5)
         self.discriminator_optimizer = tf.keras.optimizers.Adam(
-            2e-4, beta_1=0.5)
+            lr_discriminator, beta_1=0.5)
 
         self.checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
         self.checkpoint = tf.train.Checkpoint(generator_optimizer=self.generator_optimizer,
@@ -26,24 +29,27 @@ class Optimiser:
                                               generator=self.generator_model,
                                               discriminator=self.discriminator_model)
 
-    def generate_images(self, model, dataset, step, num_images=4):
-        plt.figure(figsize=(10, 20))
+    def generate_images(self, model, dataset, step, num_images=3):
         fig, axs = plt.subplots(num_images, 3)
 
         for k in range(num_images):
             example_input, example_target = next(iter(dataset.take(1)))
+
             prediction = model(example_input, training=True)
 
             display_list = [example_input[0], example_target[0], prediction[0]]
             title = ['Input Image', 'Ground Truth', 'Predicted Image']
 
             for i in range(3):
-                axs[k, i].set_title(title[i])
+                #axs[k, i].set_title(title[i])
                 # Getting the pixel values in the [0, 1] range to plot.
                 axs[k, i].imshow(display_list[i] * 0.5 + 0.5)
                 axs[k, i].axis('off')
 
-        plt.tight_layout()
+
+        plt.subplots_adjust(wspace=0, hspace=0)
+        #plt.tight_layout()
+        plt.show()
 
         wandb.log({
             'train/epoch': step,

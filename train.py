@@ -4,6 +4,8 @@ from enhance.optimiser import Optimiser
 import argparse
 import os
 import wandb
+import uuid
+
 
 def main():
     parser = argparse.ArgumentParser(description='Setup variables')
@@ -18,7 +20,7 @@ def main():
 
     parser.add_argument("--batch_size", type=int, default=1)
 
-    parser.add_argument("--patches_per_image", type=int, default=10,
+    parser.add_argument("--patches_per_image", type=int, default=1,
                         help='Patches cropped from every train image')
 
     parser.add_argument("--image_size", type=int, default=512,
@@ -27,12 +29,19 @@ def main():
     parser.add_argument("--epochs", type=int, default=512,
                         help='Number of training epochs')
 
+    parser.add_argument("--lr_generator", type=int, default=1e-4,
+                        help='Number of training epochs')
+
+    parser.add_argument("--lr_discriminator", type=int, default=1e-4,
+                        help='Number of training epochs')
+
     args = parser.parse_args()
 
     config = {}
     for key in args.__dict__:
         config[key] = args.__dict__[key]
 
+    config['log_dir'] = os.path.join(args.checkpoint_dir, str(uuid.uuid4()))
 
     """
     Init WandB
@@ -45,11 +54,15 @@ def main():
     """
     Load the datasets
     """
-    dataset_train = Dataset(os.path.join(args.data_dir, "train"), image_size=args.image_size)
-    dataset_val = Dataset(os.path.join(args.data_dir, "val"), image_size=args.image_size)
+    dataset_train = Dataset(os.path.join(
+        args.data_dir, "train"), image_size=args.image_size)
+    dataset_val = Dataset(os.path.join(
+        args.data_dir, "val"), image_size=args.image_size)
 
-    data_train = dataset_train.get_dataset(patches_per_image=args.patches_per_image)
-    data_val = dataset_val.get_dataset(patches_per_image=args.patches_per_image)
+    data_train = dataset_train.get_dataset(
+        patches_per_image=args.patches_per_image)
+    data_val = dataset_val.get_dataset(
+        patches_per_image=args.patches_per_image)
 
     dataset_train = tf.data.Dataset.from_tensor_slices(data_train)
     dataset_train = dataset_train.shuffle(args.buffer_size)
@@ -59,12 +72,14 @@ def main():
     dataset_val = dataset_val.shuffle(args.buffer_size)
     dataset_val = dataset_val.batch(args.batch_size)
 
-
     """
     Define optimiser
     """
-    optimiser = Optimiser(args.checkpoint_dir, image_size=args.image_size)
-    
+    optimiser = Optimiser(config['log_dir'],
+                          image_size=args.image_size,
+                          lr_generator=args.lr_generator,
+                          lr_discriminator=args.lr_discriminator)
+
     optimiser.train(dataset_train, dataset_val, steps=args.epochs)
 
 
